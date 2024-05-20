@@ -1,0 +1,72 @@
+public async void GetRapportParVisiteurDates()
+        {
+            try
+            {
+                // vider la liste des rapports
+                this._lesRapports.Clear();
+                this._rapportsToExport.Clear();
+                // on recupere les informations entrées par l'utilisateur
+                string dateDebut = this.TxtDateDebut.Text; // on recupere la date de debut grace a la textbox
+                string dateFin = TxtDateFin.Text; // on recupere la date de fin grace a la textbox
+                string idVisiteur =
+                    ((Visiteur)this.CmbNomPrenomVisiteurs.SelectedItem)
+                    .id; // on recupere l'id du visiteur grace a la combobox
+
+
+                string hash = this._laSecretaire.getHashTicketMdp(); // on recupere le hash du ticket
+                string url = this._site + "rapports?ticket=" + hash + "&idVisiteur=" + idVisiteur + "&dateDebut=" +
+                             dateDebut + "&dateFin=" + dateFin; // on cree l'url de la requete
+                string reponse = await this._wb.DownloadStringTaskAsync(url); // on recupere la reponse du serveur
+                dynamic
+                    d = JsonConvert
+                        .DeserializeObject(reponse); // on deserialise la reponse c'est a dire on la transforme en objet
+                
+
+                // on ajoute les rapports dans l'observable collection
+                foreach (var rapport in d.rapports)
+                {
+                    if (rapport != null &&
+                        !String.IsNullOrWhiteSpace(Convert.ToString(rapport.id)) &&
+                        !String.IsNullOrWhiteSpace(Convert.ToString(rapport.nomMedecin)) &&
+                        !String.IsNullOrWhiteSpace(Convert.ToString(rapport.prenomMedecin)) &&
+                        !String.IsNullOrWhiteSpace(Convert.ToString(rapport.date)))
+                    {
+                        if (rapport.idMedecin != null && rapport.idVisiteur != null)
+                        {
+                            Rapport newRapport =
+                                new
+                                    Rapport // permet de creer un objet de type rapport afin de l'ajouter dans la liste des rapports à exporter
+                                    // gestion des erreurs lors de la recuperation des rapports de type dynamic et List<rapport>
+                                    {
+                                        id = rapport.id, // on a ajouter un setter pour l'id dans la classe rapport
+                                        motif = rapport.motif,
+                                        bilan = rapport.bilan,
+                                        date = rapport.date,
+                                        idMedecin = rapport.idMedecin == null ? 0 : rapport.idMedecin,
+                                        idVisiteur = rapport.idVisiteur == null ? 0 : rapport.idVisiteur,
+                                        nomVisiteur = rapport.nomVisiteur,
+                                        prenomVisiteur = rapport.prenomVisiteur,
+                                        nomMedecin = rapport.nomMedecin,
+                                        prenomMedecin = rapport.prenomMedecin
+                                    };
+                            this._rapportsToExport.Add(newRapport);
+                            
+                        }
+                        this._lesRapports.Add(rapport);
+                        
+                        
+                    }
+                }
+
+                // on ajoute les rapports dans la listbox
+                DataGrid.ItemsSource = _lesRapports;
+                
+                this._laSecretaire.ticket = d.ticket; // on attribue le nouveau ticket à la secretaire
+                
+                Trace.WriteLine("Requete de récupération des rapports par visiteur et par dates par " + this._laSecretaire.prenom + " " + this._laSecretaire.nom + " à la date " + DateTime.Now); // on ajoute une trace dans le trace listener pour chaque requete de recuperation des rapports par visiteur et par dates avec le nom et prenom de la secretaire et la date de la requete
+            }
+            catch (WebException ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }

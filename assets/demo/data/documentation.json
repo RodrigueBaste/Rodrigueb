@@ -1,0 +1,25 @@
+{
+    "data": [
+        {
+            "name": "API REST", "code": "ART"
+        },
+        {
+            "name": "AGILE", "code": "AE"
+        },
+        {
+            "name": "SCRUM", "code": "SM"
+        },
+        {
+            "name": "RGPD", "code": "RGPD"
+        },
+        {
+            "name": "Model MVC (MODEL VIEW CONTROLLER)", "code": "MMVC"
+        },
+        {
+            "name": "Model MVVM (MODEL VIEW VIEW-MODEL)", "code": "MMVVM"
+        },
+        {
+            "name": "ANGULAR", "code": "AR"
+        }
+    ]
+}

@@ -1,0 +1,76 @@
+private void GestionErreurs()
+        {
+            // regex pour verifier la date
+            string pattern = @"^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$"; // Expression régulière pour le format aaaa-mm-dd
+            
+
+            // gestion des erreurs
+            // gestion des erreurs si le bilan est vide
+            if (txtBilan.Text == "")
+            {
+                throw new Exception("Le bilan est vide");
+            }
+
+            // gestion des erreurs si la date est vide
+            if (txtDate.Text == "")
+            {
+                throw new Exception("La date est vide");
+            }
+
+            // gestion des erreurs si aucun motif n'est selectionné
+            if (cmbMotif.SelectedItem == null)
+            {
+                throw new Exception("Le motif n'a pas été selectionné");
+            }
+
+            // gestion des erreurs si aucun visiteur n'est selectionné
+            if (cmbNomPrenomVisiteurs.SelectedItem == null)
+            {
+                throw new Exception("Le visiteur n'a pas été selectionné");
+            }
+
+            // gestion des erreurs si aucun medecin n'est selectionné
+            if (cmbNomPrenomMedecins.SelectedItem == null)
+            {
+                throw new Exception("Le medecin n'a pas été selectionné");
+            }
+
+            // gestion des erreurs si aucun médicament n'est selectionné
+            if (cmbMed1.SelectedItem == null)
+            {
+                throw new Exception("Veuillez selectionnér au moins un médicament");
+            }
+
+            // gestion des erreurs pour la quantité
+            if (TxtQteMed1.Text == " ")
+            {
+                throw new Exception("Veuillez renseigner la quantité du médicament 1");
+            }
+
+            // gestion des erreurs pour la date
+            if (!Regex.IsMatch(txtDate.Text, pattern))
+            {
+                throw new Exception("La date n'est pas au bon format");
+            }
+            
+            // gestion des erreurs si les medicaments 1,2,3 et 4 sont identiques entre eux
+            if ((cmbMed2.SelectedItem != null && cmbMed1.SelectedItem == cmbMed2.SelectedItem) ||
+                (cmbMed3.SelectedItem != null && cmbMed1.SelectedItem == cmbMed3.SelectedItem) ||
+                (cmbMed4.SelectedItem != null && cmbMed1.SelectedItem == cmbMed4.SelectedItem) ||
+                (cmbMed2.SelectedItem != null && cmbMed3.SelectedItem != null && cmbMed2.SelectedItem == cmbMed3.SelectedItem) ||
+                (cmbMed2.SelectedItem != null && cmbMed4.SelectedItem != null && cmbMed2.SelectedItem == cmbMed4.SelectedItem) ||
+                (cmbMed3.SelectedItem != null && cmbMed4.SelectedItem != null && cmbMed3.SelectedItem == cmbMed4.SelectedItem))
+            {
+                throw new Exception("Les médicaments ne peuvent pas être identiques, Veuillez selectionner des médicaments différents");
+            }
+
+            if (TxtQteMed1.Text == "0")
+            {
+                throw new Exception("La quantité du médicament 1 ne peut pas être égale à 0");
+            }
+
+            if ((cmbMed2.SelectedItem != null && TxtQteMed2.Text == "0") || (cmbMed3.SelectedItem != null && TxtQteMed3.Text == "0") || (cmbMed4.SelectedItem != null && TxtQteMed4.Text == "0"))
+            {
+                throw new Exception("La quantité des médicaments selectionnés ne peut pas être égale à 0");
+            }
+        }

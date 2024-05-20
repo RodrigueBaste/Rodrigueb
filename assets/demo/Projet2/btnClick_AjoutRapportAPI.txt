@@ -1,0 +1,94 @@
+private async void btnClick_AjoutRapportAPI(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                this.GestionErreurs();
+                // on recupere les inputs de la secretaire
+                string motif = this.cmbMotif.SelectedItem.ToString();
+                string bilan = this.txtBilan.Text;
+                string date = this.txtDate.Text;
+                string medicament2 = null; // on initialise les medicaments 2, 3 et 4 à null pour gerer le fait qu'ils ne sont pas obligatoires
+                string medicament3 = null;
+                string medicament4 = null;
+
+                // on creer un regle de regex pour verifier la date
+                string pattern = @"^(\d{4})-(\d{2})-(\d{2})$";
+                if (!Regex.IsMatch(date, pattern))
+                {
+                    MessageBox.Show("La date n'est pas au bon format");
+                    return;
+                }
+
+                // on recupere les id des visiteurs, medecins et medicaments car c'est ce qui est demandé par l'API
+                string idVisiteur =
+                    ((Visiteur)this.cmbNomPrenomVisiteurs.SelectedItem).id; // on recupere l'id du visiteur
+                int idMedecin = ((Medecin)this.cmbNomPrenomMedecins.SelectedItem).id; // on recupere l'id du medecin
+                string medicament1 = ((Medicament)this.cmbMed1.SelectedItem).id; // on recupere l'id du medicament1
+
+                // gerer le fait que les medicaments 2, 3 et 4 ne sont pas obligatoires
+                if (this.cmbMed2.SelectedItem != null)
+                {
+                    medicament2 = ((Medicament)this.cmbMed2.SelectedItem).id; // on recupere l'id du medicament2
+                }
+
+                if (this.cmbMed3.SelectedItem != null)
+                {
+                    medicament3 = ((Medicament)this.cmbMed3.SelectedItem).id; // on recupere l'id du medicament2
+                }
+
+                if (this.cmbMed4.SelectedItem != null)
+                {
+                    medicament4 = ((Medicament)this.cmbMed4.SelectedItem).id; // on recupere l'id du medicament2
+                }
+
+                string qteMed1 = this.TxtQteMed1.Text; // on recupere la quantité du medicament1
+                string qteMed2 = this.TxtQteMed2.Text; // on recupere la quantité du medicament2
+                string qteMed3 = this.TxtQteMed3.Text; // on recupere la quantité du medicament3
+                string qteMed4 = this.TxtQteMed4.Text; // on recupere la quantité du medicament4
+
+
+                string hash = this._laSecretaire.getHashTicketMdp(); // on recupere le ticket via la secretaire
+                string url = this._site + "/rapports?";
+
+                NameValueCollection parametre = new NameValueCollection();
+                parametre.Add("ticket", hash);
+                parametre.Add("idMedecin", idMedecin.ToString());
+                parametre.Add("idVisiteur", idVisiteur);
+                parametre.Add("bilan", bilan);
+                parametre.Add("motif", motif);
+                parametre.Add("date", date);
+
+                // ajout idMedicament et quantite sous forme medicaments[<idMed>]=<qte>
+                // le medicament 1 est obligatoire
+                parametre.Add("medicaments[" + medicament1 + "]", qteMed1);
+
+                // gerer le fait que les medicaments 2, 3 et 4 ne sont pas obligatoires
+                if (medicament2 != null && medicament2 != "")
+                {
+                    parametre.Add("medicaments[" + medicament2 + "]", qteMed2);
+                }
+
+                if (medicament3 != null && medicament3 != "")
+                {
+                    parametre.Add("medicaments[" + medicament3 + "]", qteMed3);
+                }
+
+                if (medicament4 != null && medicament4 != "")
+                {
+                    parametre.Add("medicaments[" + medicament4 + "]", qteMed4);
+                }
+
+                byte[] tab = await this._wb.UploadValuesTaskAsync(url, "POST", parametre);
+                string reponse = Encoding.UTF8.GetString(tab);
+
+                string ticket = reponse.Substring(2, reponse.Length - 2);
+                this._laSecretaire.ticket = ticket;
+
+                MessageBox.Show("Rapport ajouté avec succès");
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
